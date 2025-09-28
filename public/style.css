@@ -16,7 +16,7 @@ html,body{ width:100%; height:100%; margin:0; background:var(--bg); font-family:
 /* Prison uses full-frame background image + slide animation */
 .prison{
   position:absolute; inset:0; pointer-events:none; z-index:4;
-  background: url("./bars.png") center/cover no-repeat;
+  background: url("./bars.png") center/contain no-repeat;
   transform:translateX(100%); transition:transform .8s ease;
 }
 .prison.show{ transform:translateX(0); }
