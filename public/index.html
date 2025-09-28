@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Overlay (custom bars)</title>
+  <link rel="stylesheet" href="./style.css" />
+</head>
+<body>
+  <div id="root">
+    <div id="bonusText" class="bonus-text hidden">+10s</div>
+    <div id="prison" class="prison hidden" aria-hidden="true">
+      <div class="bar bar1"></div>
+      <div class="bar bar2"></div>
+      <div class="bar bar3"></div>
+      <div class="bar bar4"></div>
+      <div id="bigCounterWrap">
+        <span id="bigCounter">0</span><span id="bigCounterUnit"> giây</span>
+      </div>
+    </div>
+  </div>
+  <audio id="ting" src="./ting.wav" preload="auto"></audio>
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="./client.js"></script>
+</body>
+</html>
