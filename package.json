@@ -1,0 +1,15 @@
+{
+  "name": "overlay-prison-new",
+  "version": "2.0.0",
+  "private": true,
+  "description": "Clean OBS overlay with prison bars, add/rescue endpoints, and realtime debug for Tikfinity.",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "socket.io": "^4.7.5",
+    "cors": "^2.8.5",
+    "helmet": "^7.1.0"
+  }
+}
