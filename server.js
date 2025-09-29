@@ -1,3 +1,4 @@
+// server.js — nhận cả GET lẫn POST (x-www-form-urlencoded/JSON) + debug
 const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
@@ -6,14 +7,15 @@ const helmet = require('helmet');
 
 const app = express();
 app.use(express.json());
+app.use(express.urlencoded({ extended: true })); // <-- Quan trọng cho POST form
 app.use(cors());
 app.use(helmet({ contentSecurityPolicy: false }));
 
 const server = http.createServer(app);
 const io = new Server(server, { cors: { origin: "*" } });
 
-// -------- In-memory DEBUG logs --------
-const LOG_MAX = 150;
+// ==== Debug logs (realtime) ====
+const LOG_MAX = 200;
 const logs = [];
 function logRow(kind, info) {
   const row = { ts: new Date().toISOString(), kind, ...info };
@@ -22,95 +24,90 @@ function logRow(kind, info) {
   return row;
 }
 
-// -------- Static files --------
 app.use('/', express.static('public'));
 
-// -------- Helpers --------
-function toInt(v, def) { const n = parseInt(v, 10); return Number.isFinite(n) ? n : def; }
-function emitGift({ username='Anonymous', amount=1, sec=null, type='normal' }, req) {
+function toInt(v, def){ if(v===undefined||v===null||v==='') return def; const n=parseInt(v,10); return Number.isFinite(n)?n:def; }
+function pickSec(obj, def=null){ return toInt(obj?.sec ?? obj?.Sec ?? obj?.SEC ?? obj?.value1 ?? obj?.amount, def); }
+function pickAmount(obj, def=1){ return toInt(obj?.amount ?? obj?.coins ?? obj?.likeCount ?? obj?.repeatCount, def); }
+function pickUsername(obj, def='Anonymous'){ return (obj?.u || obj?.username || obj?.tikfinityUsername || obj?.nickname || obj?.nickName || def); }
+function emitGift({ username='Anonymous', amount=1, sec=null, type='normal' }, req){
   const payload = { username, amount, sec, type };
   io.emit('gift', payload);
-  logRow('gift', { path: req.path, query: req.query, body: req.body, payload });
-  return { ok: true, ...payload };
+  logRow('gift', { method:req.method, path:req.path, query:req.query, body:req.body, payload });
+  return { ok:true, ...payload };
 }
 
-// -------- Health --------
 app.get('/api/test', (req,res)=>res.json({ok:true}));
 
-// -------- Compatible endpoint (/api/gift) --------
-app.get('/api/gift', (req,res)=>{
-  const username = req.query.u || 'Anonymous';
-  const amount = toInt(req.query.amount, 1);
-  const sec = (req.query.sec !== undefined) ? toInt(req.query.sec, null) : null;
-  const type = req.query.type || 'normal'; // 'rescue' to subtract
-  res.json(emitGift({ username, amount, sec, type }, req));
+// Back-compat
+app.get('/api/gift', (req,res)=> {
+  res.json(emitGift({
+    username: pickUsername(req.query),
+    amount: pickAmount(req.query,1),
+    sec: (req.query.sec!==undefined)?toInt(req.query.sec,null):null,
+    type: req.query.type || 'normal'
+  }, req));
 });
-app.post('/api/gift', (req,res)=>{
-  const username = req.body?.username || 'Anonymous';
-  const amount = toInt(req.body?.amount, 1);
-  const sec = (req.body?.sec !== undefined) ? toInt(req.body.sec, null) : null;
-  const type = req.body?.type || 'normal';
-  res.json(emitGift({ username, amount, sec, type }, req));
-});
-
-// -------- Simple endpoints (easy for Tikfinity) --------
-app.get('/api/add', (req,res)=>{
-  const username = req.query.u || 'Anonymous';
-  const amount   = toInt(req.query.amount, 1);
-  const sec      = (req.query.sec !== undefined) ? toInt(req.query.sec, null) : null; // if null => 10*amount (handled client)
-  res.json(emitGift({ username, amount, sec, type:'normal' }, req));
-});
-app.get('/api/rescue', (req,res)=>{
-  const username = req.query.u || 'Anonymous';
-  const amount   = toInt(req.query.amount, 1);
-  const sec      = (req.query.sec !== undefined) ? toInt(req.query.sec, null) : null;
-  res.json(emitGift({ username, amount, sec, type:'rescue' }, req));
+app.post('/api/gift', (req,res)=> {
+  res.json(emitGift({
+    username: pickUsername(req.body),
+    amount: pickAmount(req.body,1),
+    sec: (req.body.sec!==undefined)?toInt(req.body.sec,null):pickSec(req.body,null),
+    type: req.body.type || 'normal'
+  }, req));
 });
 
-// -------- Debug APIs --------
-app.get('/api/logs', (req,res)=>res.json({ ok:true, logs }));
+// ADD
+app.get('/api/add', (req,res)=> {
+  res.json(emitGift({
+    username: pickUsername(req.query),
+    amount: pickAmount(req.query,1),
+    sec: (req.query.sec!==undefined)?toInt(req.query.sec,null):null,
+    type: 'normal'
+  }, req));
+});
+app.post('/api/add', (req,res)=> {
+  res.json(emitGift({
+    username: pickUsername(req.body),
+    amount: pickAmount(req.body,1),
+    sec: pickSec(req.body,null),
+    type: 'normal'
+  }, req));
+});
+
+// RESCUE
+app.get('/api/rescue', (req,res)=> {
+  res.json(emitGift({
+    username: pickUsername(req.query),
+    amount: pickAmount(req.query,1),
+    sec: (req.query.sec!==undefined)?toInt(req.query.sec,null):null,
+    type: 'rescue'
+  }, req));
+});
+app.post('/api/rescue', (req,res)=> {
+  res.json(emitGift({
+    username: pickUsername(req.body),
+    amount: pickAmount(req.body,1),
+    sec: pickSec(req.body,null),
+    type: 'rescue'
+  }, req));
+});
+
+// Debug endpoints
+app.get('/api/logs', (req,res)=>res.json({ok:true, logs}));
 app.get('/debug', (req,res)=>{
-  res.setHeader('Content-Type', 'text/html; charset=utf-8');
-  res.end(`<!doctype html><html lang="vi"><head>
-<meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Debug Tikfinity Webhooks</title>
-<style>
- body{font-family:system-ui,Arial,sans-serif;background:#0b1220;color:#e6eefc;margin:0;padding:16px}
- .row{display:grid;grid-template-columns:150px 1fr;gap:8px;padding:8px;border-bottom:1px solid #24314d}
- .mono{font-family:ui-monospace,Menlo,Consolas,monospace}
- .pill{display:inline-block;background:#22314e;color:#cfe0ff;padding:2px 6px;border-radius:8px;margin-right:6px}
- #list{max-height:70vh;overflow:auto;border:1px solid #24314d;border-radius:10px}
- .top{display:flex;gap:8px;align-items:center;margin-bottom:12px}
- button{background:#2a6df5;border:0;color:white;padding:8px 12px;border-radius:8px;cursor:pointer}
-</style></head><body>
- <div class="top">
-   <h1 style="margin:0;font-size:20px">Debug Tikfinity Webhooks</h1>
-   <button id="refresh">Refresh</button>
-   <span class="pill">GET /api/add?sec=10</span>
-   <span class="pill">GET /api/rescue?sec=10</span>
-   <a class="pill" href="/api/test" target="_blank">/api/test</a>
- </div>
- <div id="list"></div>
- <script src="/socket.io/socket.io.js"></script>
- <script>
+  res.setHeader('Content-Type','text/html; charset=utf-8');
+  res.end(`<!doctype html><html><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"><title>Debug</title>
+  <style>body{font-family:system-ui,Arial;background:#0b1220;color:#e6eefc;margin:0;padding:16px}.row{display:grid;grid-template-columns:160px 1fr;gap:8px;padding:8px;border-bottom:1px solid #24314d}.mono{font-family:ui-monospace,Menlo,Consolas,monospace}</style></head>
+  <body><h1 style="margin:0 0 12px">Debug Webhooks (GET/POST)</h1><div id="list"></div>
+  <script src="/socket.io/socket.io.js"></script><script>
   const list=document.getElementById('list');
-  function row(d){
-    const el=document.createElement('div'); el.className='row';
-    el.innerHTML=\`<div>\${d.ts}</div><div class="mono"><b>\${d.kind}</b> \${d.path||''}<br/>
-    query: \${JSON.stringify(d.query||{})}<br/>
-    body: \${JSON.stringify(d.body||{})}<br/>
-    payload: \${JSON.stringify(d.payload||{})}</div>\`;
-    list.prepend(el);
-  }
-  fetch('/api/logs').then(r=>r.json()).then(({logs})=>{(logs||[]).forEach(row)});
-  document.getElementById('refresh').onclick=()=>{list.innerHTML=''; fetch('/api/logs').then(r=>r.json()).then(({logs})=>{(logs||[]).forEach(row)})};
-  const socket=io(); socket.on('log', row);
- </script>
-</body></html>`);
+  function row(d){const el=document.createElement('div');el.className='row';el.innerHTML=\`<div>\${d.ts}</div><div class="mono"><b>\${d.kind}</b> \${d.method} \${d.path}<br/>query: \${JSON.stringify(d.query||{})}<br/>body: \${JSON.stringify(d.body||{})}<br/>payload: \${JSON.stringify(d.payload||{})}</div>\`;list.prepend(el);}
+  fetch('/api/logs').then(r=>r.json()).then(({logs})=>{(logs||[]).forEach(row)}); const ioScript = document.createElement('script'); ioScript.onload=()=>{const socket=io(); socket.on('log', row);};</script></body></html>`);
 });
-
-io.on('connection', (s)=>s.emit('hello',{msg:'connected'}));
 
 const PORT = process.env.PORT || 3000;
 const HOST = '0.0.0.0';
-server.listen(PORT, HOST, ()=>console.log(`Server running on http://${HOST}:${PORT}`));
+const httpServer = http.createServer(app);
+const ioServer = new Server(httpServer, { cors:{origin:"*"} });
+httpServer.listen(PORT, HOST, ()=>console.log(`Server on http://${HOST}:${PORT}`));
