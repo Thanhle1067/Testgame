@@ -1,0 +1,15 @@
+{
+  "name": "overlay-prison-postget-full",
+  "version": "2.1.0",
+  "private": true,
+  "description": "OBS overlay (bars) with GET/POST endpoints, debug page, and socket updates.",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "socket.io": "^4.7.5",
+    "cors": "^2.8.5",
+    "helmet": "^7.1.0"
+  }
+}
