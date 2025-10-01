@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Quản lý hình phạt</title>
+  <link rel="stylesheet" href="/admin.css"/>
+</head>
+<body>
+  <div class="container">
+    <h1>Quản lý hình phạt</h1>
+    <div class="row">
+      <textarea id="items" rows="12" placeholder="Mỗi dòng là 1 hình phạt..."></textarea>
+      <div class="panel">
+        <h3>Cài đặt giọng đọc (TTS)</h3>
+        <label><input type="checkbox" id="tts-enabled" checked/> Bật đọc kết quả</label>
+        <label>Ngôn ngữ: <input id="tts-lang" value="vi-VN"/></label>
+        <label>Tốc độ (0.5–2): <input type="number" id="tts-rate" step="0.1" min="0.5" max="2" value="1"/></label>
+        <label>Tone (0–2): <input type="number" id="tts-pitch" step="0.1" min="0" max="2" value="1"/></label>
+        <label>Âm lượng (0–1): <input type="number" id="tts-volume" step="0.1" min="0" max="1" value="1"/></label>
+        <h3 style="margin-top:8px;">Kích thước vòng quay</h3>
+        <label>Kích thước (px, 200–2000): <input type="number" id="wheel-size" min="200" max="2000" step="10" value="800"/></label>
+        <label><input type="checkbox" id="overlay-showWheel" checked/> Hiện vòng quay khi có quà (bỏ chọn = chỉ đọc giọng)</label>
+        <button id="save">Lưu</button>
+        <button id="test-spin">Test quay (giả lập quà)</button>
+      </div>
+    </div>
+    <p class="hint">Gợi ý: nhấn <b>G</b> trong cửa sổ overlay để test nhanh.</p>
+  </div>
+  <script src="/admin.js"></script>
+</body>
+</html>
