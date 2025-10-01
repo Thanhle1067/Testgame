@@ -1,0 +1,16 @@
+{
+  "name": "obs-punishment-wheel",
+  "version": "1.2.0",
+  "description": "OBS overlay: spin-the-wheel with hard-hide (no DOM until gift), Tikfinity webhook, TTS, admin with size + font.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "body-parser": "^1.20.2",
+    "cors": "^2.8.5",
+    "express": "^4.19.2",
+    "morgan": "^1.10.0",
+    "ws": "^8.18.0"
+  }
+}

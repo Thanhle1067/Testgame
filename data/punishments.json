@@ -1,0 +1,26 @@
+{
+  "items": [
+    "Hít đất 10 cái",
+    "Im lặng 30 giây",
+    "Hát 1 đoạn 15s",
+    "Uống nước 1 ngụm",
+    "Nhảy lắc 10s",
+    "Kể 1 bí mật vui",
+    "Đếm từ 50 về 0",
+    "Mỉm cười 20s không cười to"
+  ],
+  "tts": {
+    "enabled": true,
+    "lang": "vi-VN",
+    "rate": 1,
+    "pitch": 1,
+    "volume": 1
+  },
+  "wheel": {
+    "size": 800,
+    "fontScale": 1
+  },
+  "overlay": {
+    "showWheel": true
+  }
+}
