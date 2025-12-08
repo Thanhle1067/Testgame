@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🎄 Giáng Sinh OBS Overlay 🎅</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="santa.css">
+  <link rel="stylesheet" href="combo.css">
+  <link rel="stylesheet" href="wish.css">
+
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Inter:wght@600;900&display=swap"
+    rel="stylesheet">
+</head>
+
+<body>
+
+  <div id="root">
+    <div id="bars" class="bars base hidden"></div>
+    <div class="snowfall-container"></div>
+    <div class="santa-fly santa-1"></div>
+    <div class="santa-fly santa-2"></div>
+    <div class="santa-fly santa-3"></div>
+
+    <div id="counter" class="counter hidden">🎁 0 giây 🎄</div>
+    <div id="popup" class="popup">+10 giây 🎅</div>
+    <div id="snowglobe" class="snowglobe hidden"></div>
+    <div id="explosion" class="explosion hidden"></div>
+    <div id="combo-display" class="combo-container hidden"><span id="combo-count">x2</span> Combo! 🔥</div>
+  </div>
+  <audio id="snd-pull" src="./pull.mp3" preload="auto"></audio>
+  <audio id="snd-ting" src="./ting.wav" preload="auto"></audio>
+  <audio id="snd-clack" src="./clack.wav" preload="auto"></audio>
+  <audio id="snd-boom" src="./boom.wav" preload="auto"></audio>
+  <script src="client.js"></script>
+</body>
+
+</html>

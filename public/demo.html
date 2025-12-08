@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>🎄 Giáng Sinh OBS Overlay - Demo 🎅</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Inter:wght@600;900&display=swap"
+        rel="stylesheet">
+    <style>
+        /* Demo Controls */
+        .demo-controls {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.8);
+            padding: 20px;
+            border-radius: 12px;
+            border: 2px solid #ffd700;
+            z-index: 200;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .demo-btn {
+            padding: 10px 20px;
+            background: linear-gradient(135deg, #dc143c, #228b22);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-family: 'Fredoka One', sans-serif;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .demo-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(255, 215, 0, 0.4);
+        }
+
+        .demo-btn:active {
+            transform: translateY(0);
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Falling Snow Effect -->
+    <div class="snowflakes" aria-hidden="true">
+        <div class="snowflake">❅</div>
+        <div class="snowflake">❆</div>
+        <div class="snowflake">❄</div>
+        <div class="snowflake">❅</div>
+        <div class="snowflake">❆</div>
+        <div class="snowflake">❄</div>
+        <div class="snowflake">❅</div>
+        <div class="snowflake">❆</div>
+        <div class="snowflake">❄</div>
+        <div class="snowflake">❅</div>
+    </div>
+
+    <div id="root">
+        <div id="bars" class="bars base hidden"></div>
+        <div id="counter" class="counter hidden">🎁 0 giây 🎄</div>
+        <div id="popup" class="popup">+10 giây 🎅</div>
+        <div id="snowglobe" class="snowglobe hidden"></div>
+        <div id="explosion" class="explosion hidden"></div>
+    </div>
+
+    <!-- Demo Controls -->
+    <div class="demo-controls">
+        <button class="demo-btn" onclick="demoShowBars()">🎄 Hiện Nền Giáng Sinh</button>
+        <button class="demo-btn" onclick="demoAddTime()">⬆️ +10 giây</button>
+        <button class="demo-btn" onclick="demoRemoveTime()">⬇️ -10 giây</button>
+        <button class="demo-btn" onclick="demoSnowglobe()">❄️ Quả Cầu Tuyết</button>
+        <button class="demo-btn" onclick="demoUpgrade()">⭐ Nâng Cấp Gold</button>
+        <button class="demo-btn" onclick="demoReset()">🔄 Reset</button>
+    </div>
+
+    <audio id="snd-pull" src="./pull.mp3" preload="auto"></audio>
+    <audio id="snd-ting" src="./ting.wav" preload="auto"></audio>
+    <audio id="snd-clack" src="./clack.wav" preload="auto"></audio>
+    <audio id="snd-boom" src="./boom.wav" preload="auto"></audio>
+
+    <script>
+        // Demo Script
+        let demoSeconds = 0;
+        let demoStage = 1;
+        const IMG_TIER1 = './bars-default.png';
+        const IMG_TIER2 = './bars-gold.png';
+
+        const baseBars = document.getElementById('bars');
+        const counter = document.getElementById('counter');
+        const popup = document.getElementById('popup');
+        const snowglobeEl = document.getElementById('snowglobe');
+        const explosionEl = document.getElementById('explosion');
+
+        const sndPull = document.getElementById('snd-pull');
+        const sndTing = document.getElementById('snd-ting');
+        const sndClack = document.getElementById('snd-clack');
+        const sndBoom = document.getElementById('snd-boom');
+
+        function updateCounter() {
+            if (demoSeconds > 0) {
+                counter.textContent = '🎁 ' + demoSeconds + ' giây 🎄';
+                counter.classList.remove('hidden');
+            } else {
+                counter.classList.add('hidden');
+            }
+        }
+
+        function showPopupText(text, negative = false) {
+            popup.textContent = text;
+            popup.className = 'popup show' + (negative ? ' negative' : '');
+            setTimeout(() => { popup.className = 'popup'; }, 1000);
+        }
+
+        function demoShowBars() {
+            try { sndPull.currentTime = 0; sndPull.play(); } catch (e) { }
+            baseBars.classList.remove('hidden', 'exit');
+            baseBars.classList.add('enter');
+            if (!baseBars.style.backgroundImage) baseBars.style.backgroundImage = `url(${IMG_TIER1})`;
+            setTimeout(() => baseBars.classList.remove('enter'), 900);
+            demoSeconds = 0;
+            updateCounter();
+        }
+
+        function demoAddTime() {
+            demoSeconds += 10;
+            try { sndTing.currentTime = 0; sndTing.play(); } catch (e) { }
+            showPopupText('+10 giây 🎅', false);
+            updateCounter();
+            checkUpgrade();
+        }
+
+        function demoRemoveTime() {
+            demoSeconds = Math.max(0, demoSeconds - 10);
+            try { sndClack.currentTime = 0; sndClack.play(); } catch (e) { }
+            showPopupText('-10 giây ❄️', true);
+            updateCounter();
+        }
+
+        function demoSnowglobe() {
+            snowglobeEl.classList.remove('hidden');
+            snowglobeEl.classList.add('fall');
+            snowglobeEl.addEventListener('animationend', () => {
+                snowglobeEl.classList.add('hidden');
+                snowglobeEl.classList.remove('fall');
+                explosionEl.classList.remove('hidden');
+                explosionEl.classList.add('boom');
+                try { sndBoom.currentTime = 0; sndBoom.play(); } catch (e) { }
+                baseBars.classList.add('shake');
+                setTimeout(() => baseBars.classList.remove('shake'), 700);
+                setTimeout(() => {
+                    explosionEl.classList.add('hidden');
+                    explosionEl.classList.remove('boom');
+                }, 650);
+            }, { once: true });
+        }
+
+        function checkUpgrade() {
+            const newStage = (demoSeconds >= 100) ? 2 : 1;
+            if (newStage !== demoStage) {
+                demoStage = newStage;
+                demoUpgrade();
+            }
+        }
+
+        function demoUpgrade() {
+            const incoming = document.createElement('div');
+            incoming.className = 'bars next';
+            incoming.style.backgroundImage = `url(${IMG_TIER2})`;
+            document.getElementById('root').appendChild(incoming);
+            incoming.addEventListener('animationend', () => {
+                baseBars.style.backgroundImage = `url(${IMG_TIER2})`;
+                document.getElementById('root').removeChild(incoming);
+            }, { once: true });
+        }
+
+        function demoReset() {
+            demoSeconds = 0;
+            demoStage = 1;
+            baseBars.classList.add('exit');
+            setTimeout(() => {
+                baseBars.classList.add('hidden');
+                baseBars.classList.remove('exit');
+                baseBars.style.backgroundImage = `url(${IMG_TIER1})`;
+            }, 900);
+            updateCounter();
+        }
+    </script>
+</body>
+
+</html>

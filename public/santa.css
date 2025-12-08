@@ -1,0 +1,90 @@
+/* 🎅 Santa Flying Animation */
+.santa-fly {
+    display: none;
+    /* Hidden by default */
+    position: absolute;
+    width: 400px;
+    height: 200px;
+    background: url('./santa-sleigh.png') center/contain no-repeat;
+    pointer-events: none;
+    z-index: 50;
+    filter: drop-shadow(0 10px 10px rgba(0, 0, 0, 0.3));
+    left: -350px;
+    /* Start off-screen */
+
+    /* Animation: Fly from Left to Right, then flip and fly Right to Left */
+    animation: santaFly 25s linear infinite;
+}
+
+.santa-fly.flying {
+    display: block;
+    /* Show when active */
+}
+
+/* Individual Santa adjustments */
+.santa-1 {
+    top: 5%;
+    animation-delay: 0s;
+    transform: scale(0.9);
+}
+
+.santa-2 {
+    top: 20%;
+    animation-duration: 22s;
+    /* Slightly faster */
+    animation-delay: 2s;
+    transform: scale(0.8);
+    opacity: 0.9;
+}
+
+.santa-3 {
+    top: 35%;
+    animation-duration: 28s;
+    /* Slower */
+    animation-delay: 5s;
+    transform: scale(0.7);
+    opacity: 0.8;
+}
+
+@keyframes santaFly {
+
+    /* Fly Left -> Right */
+    0% {
+        left: -400px;
+        transform: scaleX(1) translateY(0);
+    }
+
+    45% {
+        left: 110%;
+        transform: scaleX(1) translateY(-20px);
+    }
+
+    /* Flip securely off-screen */
+    46% {
+        left: 110%;
+        transform: scaleX(-1) translateY(-20px);
+    }
+
+    /* Fly Right -> Left */
+    50% {
+        left: 110%;
+        /* Start return */
+        transform: scaleX(-1) translateY(-20px);
+    }
+
+    95% {
+        left: -400px;
+        transform: scaleX(-1) translateY(0);
+    }
+
+    /* Flip back securely off-screen */
+    96% {
+        left: -400px;
+        transform: scaleX(1) translateY(0);
+    }
+
+    100% {
+        left: -400px;
+        transform: scaleX(1) translateY(0);
+    }
+}
